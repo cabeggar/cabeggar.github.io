@@ -1,0 +1,692 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Mathematical Programming,Linear Programming,CPLEX," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.png?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="If we are trying to solve optimization problems, sometimes we will end up with a mathematical programming which requires modelling the problem and solve it with some solvers. For example, when we are">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linear Programming with CPLEX">
+<meta property="og:url" content="http://yoursite.com/2016/04/11/Linear-Programming-with-CPLEX/index.html">
+<meta property="og:site_name" content="cabeggar">
+<meta property="og:description" content="If we are trying to solve optimization problems, sometimes we will end up with a mathematical programming which requires modelling the problem and solve it with some solvers. For example, when we are">
+<meta property="og:updated_time" content="2016-04-11T20:17:52.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linear Programming with CPLEX">
+<meta name="twitter:description" content="If we are trying to solve optimization problems, sometimes we will end up with a mathematical programming which requires modelling the problem and solve it with some solvers. For example, when we are">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/04/11/Linear-Programming-with-CPLEX/"/>
+
+
+
+
+
+  <title> Linear Programming with CPLEX | cabeggar </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-44445012-2', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">cabeggar</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+    
+      <h1 class="site-subtitle" itemprop="description"></h1>
+    
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/04/11/Linear-Programming-with-CPLEX/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="cabeggar">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.gif">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="cabeggar">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="cabeggar" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+            
+            
+              
+                Linear Programming with CPLEX
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-11T15:45:38+08:00">
+                2016-04-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/04/11/Linear-Programming-with-CPLEX/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2016/04/11/Linear-Programming-with-CPLEX/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>If we are trying to solve optimization problems, sometimes we will end up with a mathematical programming which requires modelling the problem and solve it with some solvers. For example, when we are computing VM placement in data centers, we can use this kind of optimization to minimize usage of computer resources and network utilization. <a href="http://www-01.ibm.com/software/commerce/optimization/cplex-optimizer/" target="_blank" rel="external">IBM ILOG CPLEX Optimizer</a> is a powerful solver that can help us easily solve this kind of problems.</p>
+<p>CPLEX includes CPLEX studio, an interactive command line tool and APIs for different languages like C++, Java and Python. In this blog, I’ll go through <a href="http://www.ibm.com/support/knowledgecenter/SSSA5P_12.6.3/ilog.odms.cplex.help/CPLEX/GettingStarted/topics/tutorials/Python/Python_synopsis.html" target="_blank" rel="external">CPLEX’s example</a> for Python API to solve a linear programming problem, which is a type of mathematical problems.</p>
+<h2 id="Problem-Statement"><a href="#Problem-Statement" class="headerlink" title="Problem Statement"></a>Problem Statement</h2><p>The problem we want to solve is as follows.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Maximize			x1 + 2*x2 + 3*x3</div><div class="line">subject to			-x1 + x2 + x3 &lt;= 20</div><div class="line">					x1 - 3*x2 + x3 &lt;= 30</div><div class="line">with these bounds	0 &lt;= x1 &lt;= 40</div><div class="line">					0 &lt;= x2 &lt;= infinity</div><div class="line">					0 &lt;= x3 &lt;= infinity</div></pre></td></tr></table></figure>
+<h2 id="Prameters"><a href="#Prameters" class="headerlink" title="Prameters"></a>Prameters</h2><p>For the previous examples, some global variables can be written as follows:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> cplex</div><div class="line"><span class="keyword">from</span> cplex.exceptions <span class="keyword">import</span> CplexError</div><div class="line"><span class="keyword">import</span> sys</div><div class="line"></div><div class="line"><span class="comment"># data common to all populatedby functions</span></div><div class="line">my_obj = [<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>]</div><div class="line">my_ub = [<span class="number">40.0</span>, cplex.infinity, cplex.infinity]</div><div class="line">my_colnames = [<span class="string">"x1"</span>, <span class="string">"x2"</span>, <span class="string">"x3"</span>]</div><div class="line">my_rhs = [<span class="number">20.0</span>, <span class="number">30.0</span>]</div><div class="line">my_rownames = [<span class="string">"c1"</span>, <span class="string">"c2"</span>]</div><div class="line">my_sense = <span class="string">"LL"</span> <span class="comment"># "L" for "less-than", 2 "L" for 2 contraints</span></div></pre></td></tr></table></figure>
+<h2 id="Populate-by-rows"><a href="#Populate-by-rows" class="headerlink" title="Populate by rows"></a>Populate by rows</h2><p>The most common way to model this problems is to set constraint as rows.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">populatebyrow</span><span class="params">(prob)</span>:</span></div><div class="line">    prob.objective.set_sense(prob.objective.sense.maximize)</div><div class="line"></div><div class="line">    <span class="comment"># since lower bounds are all 0.0 (the default), lb is omitted here</span></div><div class="line">    prob.variables.add(obj = my_obj, ub = my_ub, names = my_colnames)</div><div class="line"></div><div class="line">    <span class="comment"># can query variables like the following bounds and names:</span></div><div class="line"></div><div class="line">    <span class="comment"># lbs is a list of all the lower bounds</span></div><div class="line">    lbs = prob.variables.get_lower_bounds()</div><div class="line"></div><div class="line">    <span class="comment"># ub1 is just the first lower bound</span></div><div class="line">    ub1 = prob.variables.get_upper_bounds(<span class="number">0</span>)</div><div class="line"></div><div class="line">    <span class="comment"># name is ["x1", "x3"]</span></div><div class="line">    names = prob.variables.get_names([<span class="number">0</span>, <span class="number">2</span>])</div><div class="line"></div><div class="line">    rows = [[[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>], [<span class="number">-1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>]],</div><div class="line">            [[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>], [<span class="number">1.0</span>, <span class="number">-3.0</span>, <span class="number">1</span>,<span class="number">0</span>]]]</div><div class="line">    <span class="comment"># We can also write as this</span></div><div class="line">    <span class="comment"># rows = [[[0, "x2", "x3"], [-1.0, 1.0, 1.0]],</span></div><div class="line">    <span class="comment">#         [["x1", 1, 2], [1.0, -3.0, 1,0]]]</span></div><div class="line"></div><div class="line">    prob.linear_constraints.add(lin_expr = rows,</div><div class="line">                                senses = my_sense,</div><div class="line">                                rhs = my_rhs,</div><div class="line">                                names = my_rownames)</div><div class="line"></div><div class="line">    <span class="comment"># because there are two arguments, they are taken to specify a range</span></div><div class="line">    <span class="comment"># thus, cols is the entire constraint matrix as a list of column vectors</span></div><div class="line">    cols = prob.variables.get_cols(<span class="string">"x1"</span>, <span class="string">"x3"</span>)</div></pre></td></tr></table></figure>
+<p>We first set our target to maximize our objective. Then we add our objectives, upper bound of variables (lower bound set to 0 as default) and name of columns (variables). Then we set the constrainst by rows, first adding indexes or name of variables, and set coefficient secondly. At last we add our constraints into the problem solver.</p>
+<h2 id="Populate-by-columns"><a href="#Populate-by-columns" class="headerlink" title="Populate by columns"></a>Populate by columns</h2><p>In some situations, it may be better to populate by columns.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">populatebycolumn</span><span class="params">(prob)</span>:</span></div><div class="line">    prob.objective.set_sense(prob.objective.sense.maximize)</div><div class="line"></div><div class="line">    prob.linear_constraints.add(rhs = my_rhs,</div><div class="line">                                senses = my_sense,</div><div class="line">                                names = my_rownames)</div><div class="line"></div><div class="line">    <span class="string">"""</span></div><div class="line">    populate by columns</div><div class="line">    constraints: -x1+x2+x3&lt;=20</div><div class="line">                 x1-3x2+x3&lt;=30</div><div class="line">    converted into: -c1+c2</div><div class="line">                    c1-3c2</div><div class="line">                    c1+c2</div><div class="line">    """</div><div class="line">    c = [[[<span class="number">0</span>, <span class="number">1</span>], [<span class="number">-1.0</span>, <span class="number">1.0</span>]],</div><div class="line">         [[<span class="string">"c1"</span>, <span class="number">1</span>], [<span class="number">1.0</span>, <span class="number">-3.0</span>]],</div><div class="line">         [[<span class="number">0</span>, <span class="string">"c2"</span>], [<span class="number">1.0</span>, <span class="number">1.0</span>]]]</div><div class="line"></div><div class="line">    prob.variables.add(obj = my_obj,</div><div class="line">                       ub = my_ub,</div><div class="line">                       names = my_colnames,</div><div class="line">                       columns = c)</div></pre></td></tr></table></figure>
+<p>It’s like we tranverse the matrix in previous method and we set “c” as basic element in constraints. We also add constraints before adding variables in this method. Whether to populate by rows or columns should be based on number of constraints and number of variables.</p>
+<h2 id="Populate-by-non-zero"><a href="#Populate-by-non-zero" class="headerlink" title="Populate by non-zero"></a>Populate by non-zero</h2><p>At last, there’s a third method to populate the problem with non-zero elements in the matrix.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">populatebynonzero</span><span class="params">(prob)</span>:</span></div><div class="line">    prob.objective.set_sense(prob.objective.sense.maximize)</div><div class="line"></div><div class="line">    prob.linear_constraints.add(rhs = my_rhs,</div><div class="line">                                senses = my_sense,</div><div class="line">                                names = my_rownames)</div><div class="line">    prob.variables.add(obj = my_obj,</div><div class="line">                       ub = my_ub,</div><div class="line">                       names = my_colnames)</div><div class="line"></div><div class="line">    <span class="string">"""</span></div><div class="line">    The following is a sparse matrix</div><div class="line">    number in rows and cols represents location in matrix</div><div class="line">    vals represent values at specific location</div><div class="line">    """</div><div class="line">    rows = [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>]</div><div class="line">    cols = [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>]</div><div class="line">    vals = [<span class="number">-1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">-3.0</span>, <span class="number">1.0</span>]</div><div class="line"></div><div class="line">    prob.linear_constraints.set_coefficients(zip(rows, cols, vals))</div><div class="line">    <span class="comment"># can also change one coefficient at a time</span></div><div class="line"></div><div class="line">    <span class="comment"># prob.linear_constraints.set_coefficients(1, 1, -3.0)</span></div><div class="line">    <span class="comment"># or pass in a list of triples</span></div><div class="line">    <span class="comment"># prob.linear_constraints.set_coefficients([(0, 1, 1.0), (1, 1, -3.0)])</span></div></pre></td></tr></table></figure>
+<p>This method is good at handle sparse matrix. In this example, the matrix is like this:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">-1	1	1</div><div class="line">1	-3	1</div></pre></td></tr></table></figure>
+<p>The value in rows and cols composite the location of a value in corresponding order in vals.</p>
+<h2 id="Final"><a href="#Final" class="headerlink" title="Final"></a>Final</h2><p>There are still some final codes which is easy to understand.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">lpex1</span><span class="params">(pop_method)</span>:</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        my_prob = cplex.Cplex()</div><div class="line"></div><div class="line">        <span class="keyword">if</span> pop_method == <span class="string">"r"</span>:</div><div class="line">            handle = populatebyrow(my_prob)</div><div class="line">        <span class="keyword">if</span> pop_method == <span class="string">"c"</span>:</div><div class="line">            handle = populatebycolumn(my_prob)</div><div class="line">        <span class="keyword">if</span> pop_method == <span class="string">"n"</span>:</div><div class="line">            handle = populatebynonzero(my_prob)</div><div class="line"></div><div class="line">        my_prob.solve()</div><div class="line">    <span class="keyword">except</span> CplexError, exc:</div><div class="line">        <span class="keyword">print</span> exc</div><div class="line">        <span class="keyword">return</span></div><div class="line"></div><div class="line">    numrows = my_prob.linear_constraints.get_num()</div><div class="line">    numcols = my_prob.variables.get_num()</div><div class="line"></div><div class="line">    <span class="keyword">print</span></div><div class="line"></div><div class="line">    <span class="comment"># solution.get_status() returns an integer code</span></div><div class="line">    <span class="keyword">print</span> <span class="string">"Solution status = "</span>, my_prob.solution.get_status(), <span class="string">":"</span>,</div><div class="line">    <span class="comment"># the following line prints the corresponding string</span></div><div class="line">    <span class="keyword">print</span> my_prob.solution.status[my_prob.solution.get_status()]</div><div class="line">    <span class="keyword">print</span> <span class="string">"Solution value = "</span>, my_prob.solution.get_objective_value()</div><div class="line">    slack = my_prob.solution.get_linear_slacks()</div><div class="line">    pi = my_prob.solution.get_dual_values()</div><div class="line">    x = my_prob.solution.get_values()</div><div class="line">    dj = my_prob.solution.get_reduced_costs()</div><div class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(numrows):</div><div class="line">        <span class="keyword">print</span> <span class="string">"Row %d:  Slack = %10f    Pi = %10f"</span> % (i, slack[i], pi[i])</div><div class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> range(numcols):</div><div class="line">        <span class="keyword">print</span> <span class="string">"Column %d:   Value = %10f    Reduced cost = %10f"</span> % (j, x[j], dj[j])</div><div class="line"></div><div class="line">    my_prob.write(<span class="string">"lpex1.lp"</span>)</div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</div><div class="line">    <span class="keyword">if</span> len(sys.argv) != <span class="number">2</span> <span class="keyword">or</span> sys.argv[<span class="number">1</span>] <span class="keyword">not</span> <span class="keyword">in</span> [<span class="string">"-r"</span>, <span class="string">"-c"</span>, <span class="string">"-n"</span>]:</div><div class="line">        <span class="keyword">print</span> <span class="string">"Usage: lpex1.py -X"</span></div><div class="line">        <span class="keyword">print</span> <span class="string">"   where X is one of the following options"</span></div><div class="line">        <span class="keyword">print</span> <span class="string">"      r          generate problem by row"</span></div><div class="line">        <span class="keyword">print</span> <span class="string">"      c          generate problem by column"</span></div><div class="line">        <span class="keyword">print</span> <span class="string">"      n          generate problem by nonzero"</span></div><div class="line">        <span class="keyword">print</span> <span class="string">" Exiting..."</span></div><div class="line">        sys.exit(<span class="number">-1</span>)</div><div class="line">    lpex1(sys.argv[<span class="number">1</span>][<span class="number">1</span>])</div><div class="line"><span class="keyword">else</span>:</div><div class="line">    prompt = <span class="string">"""Enter the letter indicating how the problem data should be populated:</span></div><div class="line">    r : populate by rows</div><div class="line">    c : populate by columns</div><div class="line">    n : populate by nonzeros\n ? &gt; """</div><div class="line">    r = <span class="string">'r'</span></div><div class="line">    c = <span class="string">'c'</span></div><div class="line">    n = <span class="string">'n'</span></div><div class="line">    lpex1(input(prompt))</div></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Mathematical-Programming/" rel="tag"># Mathematical Programming</a>
+          
+            <a href="/tags/Linear-Programming/" rel="tag"># Linear Programming</a>
+          
+            <a href="/tags/CPLEX/" rel="tag"># CPLEX</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/20/Gratuitous-ARP-spoofing/" rel="next" title="Gratuitous ARP spoofing">
+                <i class="fa fa-chevron-left"></i> Gratuitous ARP spoofing
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="cabeggar" />
+          <p class="site-author-name" itemprop="name">cabeggar</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Problem-Statement"><span class="nav-number">1.</span> <span class="nav-text">Problem Statement</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Prameters"><span class="nav-number">2.</span> <span class="nav-text">Prameters</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Populate-by-rows"><span class="nav-number">3.</span> <span class="nav-text">Populate by rows</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Populate-by-columns"><span class="nav-number">4.</span> <span class="nav-text">Populate by columns</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Populate-by-non-zero"><span class="nav-number">5.</span> <span class="nav-text">Populate by non-zero</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Final"><span class="nav-number">6.</span> <span class="nav-text">Final</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">cabeggar</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+    <script type="text/javascript">
+      var disqus_shortname = 'cabloggar';
+      var disqus_identifier = '2016/04/11/Linear-Programming-with-CPLEX/';
+
+      var disqus_title = "Linear Programming with CPLEX";
+
+
+      function run_disqus_script(disqus_script) {
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      }
+
+      run_disqus_script('count.js');
+
+      
+        var disqus_config = function () {
+            this.page.url = disqus_url;
+            this.page.identifier = disqus_identifier;
+            this.page.title = disqus_title;
+        };
+        run_disqus_script('embed.js');
+      
+
+    </script>
+  
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+</body>
+</html>

